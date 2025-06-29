@@ -361,7 +361,7 @@ void RendererOpenGL::renderVr(float yaw, float pitch, float roll, float fov)
     glm::mat4 view = glm::mat4(1.0f);
     view = glm::rotate(view, glm::radians(roll), glm::vec3(0, 1, 0));
     view = glm::rotate(view, -glm::radians(pitch), glm::vec3(1, 0, 0));
-    view = glm::rotate(view, -glm::radians(yaw + 90), glm::vec3(0, 0, 1));
+    view = glm::rotate(view, glm::radians(yaw), glm::vec3(0, 0, 1));
 
     int width;
     int height;
