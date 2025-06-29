@@ -11,6 +11,8 @@ add_library(${PROJECT_NAME} SHARED
     ofnx/files/4xm.cpp
     ofnx/files/arnvit.h
     ofnx/files/arnvit.cpp
+    ofnx/files/lst.h
+    ofnx/files/lst.cpp
     ofnx/files/pak.h
     ofnx/files/pak.cpp
     ofnx/files/tst.h
