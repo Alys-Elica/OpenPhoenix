@@ -405,7 +405,7 @@ void RendererOpenGL::setCursorSettings(bool visible, bool centerLocked)
 {
     SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_CURSOR_VISIBLE, visible ? "1" : "0");
     SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, centerLocked ? "1" : "0");
-    SDL_SetWindowRelativeMouseMode(d_ptr->m_window, true);
+    SDL_SetWindowRelativeMouseMode(d_ptr->m_window, centerLocked);
 }
 
 void RendererOpenGL::setCursorSystem(const CursorSystem& cursor)
