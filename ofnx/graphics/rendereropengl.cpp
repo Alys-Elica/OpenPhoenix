@@ -345,14 +345,14 @@ void RendererOpenGL::deinit()
 
 void RendererOpenGL::updateVr(unsigned short* vr)
 {
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 256, 6144, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, vr);
     glBindTexture(GL_TEXTURE_2D, d_ptr->m_textureVr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 256, 6144, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, vr);
 }
 
 void RendererOpenGL::updateFrame(unsigned short* frame)
 {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 640, 480, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, frame);
     glBindTexture(GL_TEXTURE_2D, d_ptr->m_textureFrame);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 640, 480, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, frame);
 }
 
 void RendererOpenGL::renderVr(float yaw, float pitch, float roll, float fov)
