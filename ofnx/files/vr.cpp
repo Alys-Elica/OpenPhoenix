@@ -61,8 +61,6 @@ private:
     std::vector<uint8_t> m_dctData;
     uint32_t m_dctQuality;
     std::map<std::string, Anim> m_animationList;
-
-    int tmpAnimCount = 0;
 };
 
 /* PUBLIC */
@@ -78,10 +76,7 @@ Vr::~Vr()
 
 bool Vr::load(const std::string& vrFileName)
 {
-    d_ptr->m_dctData.clear();
-    d_ptr->m_animationList.clear();
-    d_ptr->m_vrType = Type::VR_UNKNOWN;
-    d_ptr->tmpAnimCount = 0;
+    clear();
 
     std::fstream fileIn(vrFileName, std::ios::binary | std::ios::in);
     if (!fileIn.is_open()) {
@@ -141,8 +136,6 @@ bool Vr::load(const std::string& vrFileName)
                 d_ptr->m_vrType = Type::VR_STATIC_VR;
             }
         } else if (chunkType == VR_TYPE_ANIMATION) {
-            d_ptr->tmpAnimCount++;
-
             char strName[0x20];
             ds.read(0x20, (uint8_t*)strName);
             std::string animName(strName);
@@ -205,6 +198,13 @@ bool Vr::load(const std::string& vrFileName)
     return true;
 }
 
+void Vr::clear()
+{
+    d_ptr->m_dctData.clear();
+    d_ptr->m_animationList.clear();
+    d_ptr->m_vrType = Type::VR_UNKNOWN;
+}
+
 int Vr::getWidth() const
 {
     switch (getType()) {
@@ -246,11 +246,6 @@ bool Vr::getDataRgb565(std::vector<uint16_t>& dataRgb565) const
     }
 
     return true;
-}
-
-int Vr::getAnimationCount()
-{
-    return d_ptr->tmpAnimCount;
 }
 
 bool Vr::applyAnimationFrameRgb565(const std::string& name, uint16_t* bufferOut)

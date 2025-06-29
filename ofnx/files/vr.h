@@ -62,6 +62,11 @@ public:
     bool load(const std::string& vrFileName);
 
     /**
+     * @brief Clears loaded data
+     */
+    void clear();
+
+    /**
      * @brief Returns image width (0 if invalid)
      */
     int getWidth() const;
@@ -82,11 +87,6 @@ public:
      * @param dataRgb565 Output RGB565 buffer (resized automatically)
      */
     bool getDataRgb565(std::vector<uint16_t>& dataRgb565) const;
-
-    /**
-     * @brief Returns VR animation count
-     */
-    int getAnimationCount();
 
     /**
      * @brief Applies current animation frame to an RGB565 buffer
