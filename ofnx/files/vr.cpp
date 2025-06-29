@@ -252,7 +252,7 @@ bool Vr::applyAnimationFrameRgb565(const std::string& name, uint16_t* bufferOut)
 {
     auto anim = d_ptr->m_animationList.find(name);
     if (anim == d_ptr->m_animationList.end()) {
-        std::cerr << "[vr] Animation not found" << std::endl;
+        // std::cerr << "[vr] Animation not found" << std::endl;
         return false;
     }
 
