@@ -7,6 +7,8 @@ project(${PROJECT_NAME} VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 
 add_library(${PROJECT_NAME} SHARED
+    ofnx/files/4xm.h
+    ofnx/files/4xm.cpp
     ofnx/files/arnvit.h
     ofnx/files/arnvit.cpp
     ofnx/files/pak.h

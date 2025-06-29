@@ -22,8 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef OFNX_FILES_ARNVIT_H
-#define OFNX_FILES_ARNVIT_H
+#ifndef OFNX_FILES_4XM_H
+#define OFNX_FILES_4XM_H
 
 #include "ofnx/ofnx_globals.h"
 
@@ -33,38 +33,49 @@ SOFTWARE.
 
 namespace ofnx::files {
 
-class OFNX_EXPORT ArnVit final {
+class OFNX_EXPORT Fxm final {
 public:
-    struct ArnVitFile {
-        std::string fileName;
+    enum AudioType {
+        AT_PCM = 0,
+        AT_4X_IMA_ADPCM = 1,
+    };
+
+    struct TrackVideo {
+        std::string name;
         uint32_t width;
         uint32_t height;
-        uint32_t fileSize;
-        uint32_t offset;
+    };
 
-        uint32_t unkn1;
-        uint32_t unkn2;
-        uint32_t unkn3;
-        uint32_t unkn4;
-
-        std::vector<uint8_t> data;
+    struct TrackSound {
+        std::string name;
+        int trackNumber;
+        AudioType type;
+        int channels;
+        int sampleRate;
+        int sampleResolution;
     };
 
 public:
-    ArnVit();
-    ~ArnVit();
+    Fxm();
+    ~Fxm();
 
-    ArnVit(const ArnVit& other) = delete;
-    ArnVit& operator=(const ArnVit& other) = delete;
-
-    bool open(const std::string& vitFileName, const std::string& arnFileName);
+    bool open(const std::string& videoName);
     void close();
+
     bool isOpen() const;
 
-    int fileCount() const;
-    ArnVitFile getFile(const int index) const;
-    ArnVitFile getFile(const std::string& name) const;
-    bool writeToBmp(const int index, const std::string& outputDirectory) const;
+    void printInfo() const;
+
+    int getWidth() const;
+    int getHeight() const;
+
+    int getFrameRate() const;
+    int getFrameCount() const;
+
+    bool hasSound() const;
+    const TrackSound& getTrackSound() const;
+
+    bool readFrame(std::vector<uint16_t>& dataVideo, std::vector<uint8_t>& dataAudio);
 
 private:
     class Impl;
@@ -73,4 +84,4 @@ private:
 
 } // namespace ofnx::files
 
-#endif // OFNX_FILES_ARNVIT_H
+#endif // OFNX_FILES_4XM_H
