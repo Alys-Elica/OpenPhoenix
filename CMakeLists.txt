@@ -7,6 +7,8 @@ project(${PROJECT_NAME} VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 
 add_library(${PROJECT_NAME} SHARED
+    ofnx/files/pak.h
+    ofnx/files/pak.cpp
     ofnx/files/tst.h
     ofnx/files/tst.cpp
     ofnx/files/vr.h
