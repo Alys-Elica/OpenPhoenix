@@ -44,6 +44,8 @@ public:
     enum class Type {
         VR_STATIC_PIC,
         VR_STATIC_VR,
+        VR2_STATIC_PIC,
+        VR2_STATIC_VR,
         VR_UNKNOWN,
     };
 

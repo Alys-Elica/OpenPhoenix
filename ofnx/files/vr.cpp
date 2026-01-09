@@ -38,6 +38,13 @@ namespace ofnx::files {
 #define VR_TYPE_PIC -0x5f4e3c00
 #define VR_TYPE_VR -0x5f4e3e00
 #define VR_TYPE_ANIMATION -0x5f4e3dff
+#define VR_TYPE_ANIMATION_FRAME 0xa0b1c211
+
+#define VR2_FILE_HEADER 0x44414548 // HEAD
+#define VR2_TYPE_PIC 0x43505453 // STPC
+#define VR2_TYPE_VR 0x50575453 // STWP
+#define VR2_TYPE_ANIMATION 0x50574E41 // ANWP
+#define VR2_TYPE_ANIMATION_FRAME 0x4D415246 // FRAM
 
 /* PRIVATE */
 class Vr::Impl {
@@ -96,7 +103,7 @@ bool Vr::load(const std::string& vrFileName)
     ds >> chunkType;
     ds >> chunkSize;
 
-    if (chunkType != VR_FILE_HEADER) {
+    if (chunkType != VR_FILE_HEADER && chunkType != VR2_FILE_HEADER) {
         std::cerr << "[vr] Wrong file header" << std::endl;
         return false;
     }
@@ -115,7 +122,8 @@ bool Vr::load(const std::string& vrFileName)
             break;
         }
 
-        if (chunkType == VR_TYPE_PIC || chunkType == VR_TYPE_VR) {
+        if (chunkType == VR_TYPE_PIC || chunkType == VR_TYPE_VR
+            || chunkType == VR2_TYPE_PIC || chunkType == VR2_TYPE_VR) {
             if (d_ptr->m_vrType != Type::VR_UNKNOWN) {
                 std::cerr << "[vr] Multiple image data in file" << std::endl;
                 return false;
@@ -130,12 +138,21 @@ bool Vr::load(const std::string& vrFileName)
             ds.read(dcDataSize, d_ptr->m_dctData.data());
 
             ofnx::graphics::Dct dct;
-            if (chunkType == VR_TYPE_PIC) {
+            switch (chunkType) {
+            case VR_TYPE_PIC:
                 d_ptr->m_vrType = Type::VR_STATIC_PIC;
-            } else {
+                break;
+            case VR_TYPE_VR:
                 d_ptr->m_vrType = Type::VR_STATIC_VR;
+                break;
+            case VR2_TYPE_PIC:
+                d_ptr->m_vrType = Type::VR2_STATIC_PIC;
+                break;
+            case VR2_TYPE_VR:
+                d_ptr->m_vrType = Type::VR2_STATIC_VR;
+                break;
             }
-        } else if (chunkType == VR_TYPE_ANIMATION) {
+        } else if (chunkType == VR_TYPE_ANIMATION || chunkType == VR2_TYPE_ANIMATION) {
             char strName[0x20];
             ds.read(0x20, (uint8_t*)strName);
             std::string animName(strName);
@@ -150,7 +167,7 @@ bool Vr::load(const std::string& vrFileName)
                 ds >> subChunkType;
                 ds >> subChunkSize;
 
-                if (subChunkType != 0xa0b1c211) {
+                if (subChunkType != VR_TYPE_ANIMATION_FRAME && subChunkType != VR2_TYPE_ANIMATION_FRAME) {
                     std::cerr << "[vr] Unknown animation sub-chunk type "
                               << std::hex << subChunkType << std::dec
                               << " -> ignoring" << std::endl;
@@ -209,8 +226,10 @@ int Vr::getWidth() const
 {
     switch (getType()) {
     case Type::VR_STATIC_VR:
+    case Type::VR2_STATIC_VR:
         return 256;
     case Type::VR_STATIC_PIC:
+    case Type::VR2_STATIC_PIC:
         return 640;
     default:
         return 0;
@@ -221,8 +240,10 @@ int Vr::getHeight() const
 {
     switch (getType()) {
     case Type::VR_STATIC_VR:
+    case Type::VR2_STATIC_VR:
         return 6144;
     case Type::VR_STATIC_PIC:
+    case Type::VR2_STATIC_PIC:
         return 480;
     default:
         return 0;
@@ -237,11 +258,16 @@ Vr::Type Vr::getType() const
 bool Vr::getDataRgb565(std::vector<uint16_t>& dataRgb565) const
 {
     ofnx::graphics::Dct dct;
-    if (d_ptr->m_vrType == Type::VR_STATIC_PIC) {
-        dct.unpackImageRgb16(640, 480, d_ptr->m_dctQuality, d_ptr->m_dctData, dataRgb565);
-    } else if (d_ptr->m_vrType == Type::VR_STATIC_VR) {
+    switch (getType()) {
+    case Type::VR_STATIC_VR:
+    case Type::VR2_STATIC_VR:
         dct.unpackImageRgb16(256, 6144, d_ptr->m_dctQuality, d_ptr->m_dctData, dataRgb565);
-    } else {
+        break;
+    case Type::VR_STATIC_PIC:
+    case Type::VR2_STATIC_PIC:
+        dct.unpackImageRgb16(640, 480, d_ptr->m_dctQuality, d_ptr->m_dctData, dataRgb565);
+        break;
+    default:
         return false;
     }
 
