@@ -49,14 +49,14 @@ OfnxManager::~OfnxManager()
     delete d_ptr;
 }
 
-bool OfnxManager::init(int width, int height)
+bool OfnxManager::init(int width, int height, bool isNewVrVersion)
 {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         std::cerr << "SDL_Init failed - " << SDL_GetError() << std::endl;
         return 1;
     }
 
-    if (!d_ptr->m_renderer.init(width, height)) {
+    if (!d_ptr->m_renderer.init(width, height, isNewVrVersion)) {
         std::cerr << "Failed to initialize renderer" << std::endl;
         return false;
     }

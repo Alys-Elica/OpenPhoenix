@@ -59,7 +59,7 @@ public:
     OfnxManager();
     ~OfnxManager();
 
-    bool init(int width, int height);
+    bool init(int width, int height, bool isNewVrVersion);
     void deinit();
 
     // TODO: might create a more flexible render manager (vulkan, D3D, etc.)

@@ -46,7 +46,7 @@ public:
     RendererOpenGL();
     ~RendererOpenGL();
 
-    bool init(int width, int height);
+    bool init(int width, int height, bool isNewVr);
     void deinit();
 
     void updateVr(unsigned short* vr);
