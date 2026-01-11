@@ -176,7 +176,6 @@ bool Vr::load(const std::string& vrFileName)
 
                 if (subChunkSize - 8 == 0) {
                     // Empty frame -> skipping
-                    std::cout << "[vr] Empty frame" << std::endl;
                     d_ptr->m_animationList[animName].frameList.push_back({});
                     continue;
                 }
@@ -202,8 +201,6 @@ bool Vr::load(const std::string& vrFileName)
 
                 d_ptr->m_animationList[animName].frameList.push_back(animFrame);
             }
-
-            std::cout << "[vr] Loaded animation " << animName << std::endl;
         } else {
             std::cerr << "[vr] Unknown chunk type at offset 0x"
                       << std::hex << (fileIn.tellg() - 8) << std::dec << ": "
