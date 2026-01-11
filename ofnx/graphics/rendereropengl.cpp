@@ -31,6 +31,7 @@ SOFTWARE.
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_opengl.h>
+#include <SDL3_image/SDL_image.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -492,6 +493,33 @@ void RendererOpenGL::setCursorSystem(const CursorSystem& cursor)
         d_ptr->m_cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
         break;
     }
+
+    SDL_SetCursor(d_ptr->m_cursor);
+}
+
+void RendererOpenGL::setCursor(const std::string& cursorFile)
+{
+    SDL_Surface* cursorSurface = IMG_Load(cursorFile.c_str());
+    if (!cursorSurface) {
+        std::cerr << "Failed to load image: " << SDL_GetError() << std::endl;
+        return;
+    }
+
+    int hotX = cursorSurface->w / 2;
+    int hotY = cursorSurface->h / 2;
+    SDL_Cursor* cursor = SDL_CreateColorCursor(cursorSurface, hotX, hotY);
+
+    SDL_DestroySurface(cursorSurface);
+
+    if (!cursor) {
+        std::cerr << "Failed to create SDL cursor: " << SDL_GetError() << std::endl;
+        return;
+    }
+
+    if (d_ptr->m_cursor) {
+        SDL_DestroyCursor(d_ptr->m_cursor);
+    }
+    d_ptr->m_cursor = cursor;
 
     SDL_SetCursor(d_ptr->m_cursor);
 }

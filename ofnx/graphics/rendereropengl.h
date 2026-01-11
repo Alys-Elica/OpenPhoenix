@@ -27,6 +27,8 @@ SOFTWARE.
 
 #include "ofnx/ofnx_globals.h"
 
+#include <string>
+
 namespace ofnx::graphics {
 
 /**
@@ -56,6 +58,7 @@ public:
 
     void setCursorSettings(bool visible, bool centerLocked);
     void setCursorSystem(const CursorSystem& cursor);
+    void setCursor(const std::string& cursorFile);
 
 private:
     class Impl;
