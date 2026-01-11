@@ -34,11 +34,11 @@ SOFTWARE.
 
 namespace ofnx::files {
 
-#define VR_FILE_HEADER 0x12fa84ab
-#define VR_TYPE_PIC -0x5f4e3c00
-#define VR_TYPE_VR -0x5f4e3e00
-#define VR_TYPE_ANIMATION -0x5f4e3dff
-#define VR_TYPE_ANIMATION_FRAME 0xa0b1c211
+#define VR_FILE_HEADER 0x12FA84AB
+#define VR_TYPE_PIC 0xA0B1C400
+#define VR_TYPE_VR 0xA0B1C200
+#define VR_TYPE_ANIMATION 0xA0B1C201
+#define VR_TYPE_ANIMATION_FRAME 0xA0B1C211
 
 #define VR2_FILE_HEADER 0x44414548 // HEAD
 #define VR2_TYPE_PIC 0x43505453 // STPC
@@ -205,7 +205,8 @@ bool Vr::load(const std::string& vrFileName)
 
             std::cout << "[vr] Loaded animation " << animName << std::endl;
         } else {
-            std::cerr << "[vr] Unknown chunk type: "
+            std::cerr << "[vr] Unknown chunk type at offset 0x"
+                      << std::hex << (fileIn.tellg() - 8) << std::dec << ": "
                       << std::hex << chunkType << std::dec
                       << " -> ignoring" << std::endl;
             fileIn.seekg(chunkSize - 8, std::ios::cur);
