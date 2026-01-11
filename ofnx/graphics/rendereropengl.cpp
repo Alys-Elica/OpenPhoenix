@@ -459,6 +459,13 @@ void RendererOpenGL::renderFrame()
 
 void RendererOpenGL::setCursorSettings(bool visible, bool centerLocked)
 {
+    if (centerLocked) {
+        int width;
+        int height;
+        SDL_GetWindowSize(d_ptr->m_window, &width, &height);
+        SDL_WarpMouseInWindow(d_ptr->m_window, width / 2, height / 2);
+    }
+
     SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_CURSOR_VISIBLE, visible ? "1" : "0");
     SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, centerLocked ? "1" : "0");
     SDL_SetWindowRelativeMouseMode(d_ptr->m_window, centerLocked);
