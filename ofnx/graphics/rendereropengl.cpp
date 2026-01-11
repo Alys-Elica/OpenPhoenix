@@ -505,6 +505,16 @@ void RendererOpenGL::setCursor(const std::string& cursorFile)
         return;
     }
 
+    const SDL_PixelFormatDetails* formatDetails = SDL_GetPixelFormatDetails(cursorSurface->format);
+    if (!formatDetails) {
+        std::cerr << "Failed to get format details " << SDL_GetError() << std::endl;
+        SDL_DestroySurface(cursorSurface);
+        return;
+    }
+
+    Uint32 key = SDL_MapRGBA(formatDetails, NULL, 0, 0, 0, 0);
+    SDL_SetSurfaceColorKey(cursorSurface, true, key);
+
     int hotX = cursorSurface->w / 2;
     int hotY = cursorSurface->h / 2;
     SDL_Cursor* cursor = SDL_CreateColorCursor(cursorSurface, hotX, hotY);
