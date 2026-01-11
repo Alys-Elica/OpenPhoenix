@@ -56,4 +56,4 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${OPENGL_INCLUDE_DIR})
 
 # GLM
 find_package(glm CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm-header-only)
+target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm)
