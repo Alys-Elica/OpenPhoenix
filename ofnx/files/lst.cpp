@@ -80,8 +80,6 @@ public:
     bool addVariable(const std::string& name);
     bool addInstruction(const std::string& warpName, const int& testId, const Instruction& instruction);
 
-    void optimize();
-
 private:
     // Parsing data
     std::fstream m_file;
@@ -429,43 +427,6 @@ bool Lst::Impl::addInstruction(
     return true;
 }
 
-void optimizeInstructionBlock(Lst::InstructionBlock& block)
-{
-    for (auto it = block.begin(); it != block.end();) {
-        // Combine identical ifand/ifor blocks
-        if (it->name == "ifand" || it->name == "ifor") {
-            if (it != block.end() - 1) {
-                if ((it + 1)->name == it->name && (it + 1)->params == it->params) {
-                    it->subInstructions.insert(
-                        it->subInstructions.end(),
-                        (it + 1)->subInstructions.begin(),
-                        (it + 1)->subInstructions.end());
-                    block.erase(it + 1);
-                    continue;
-                }
-            }
-        }
-        ++it;
-    }
-}
-
-void Lst::Impl::optimize()
-{
-    for (auto& warp : m_listWarps) {
-        for (auto& test : warp.second.testBlockList) {
-            optimizeInstructionBlock(test.second);
-        }
-    }
-
-    for (auto& subroutine : m_listSubroutines) {
-        optimizeInstructionBlock(subroutine.second.subInstructions);
-    }
-
-    for (auto& warp : m_listWarps) {
-        optimizeInstructionBlock(warp.second.initBlock);
-    }
-}
-
 /* PUBLIC */
 Lst::Lst()
 {
@@ -543,8 +504,6 @@ bool Lst::parseLst(const std::string& fileName)
         return false;
     }
     d_ptr->m_file.close();
-
-    d_ptr->optimize();
 
     return true;
 }
