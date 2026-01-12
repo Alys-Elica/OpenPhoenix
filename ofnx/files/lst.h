@@ -27,6 +27,7 @@ SOFTWARE.
 
 #include "ofnx/ofnx_globals.h"
 
+#include <set>
 #include <string>
 #include <variant>
 #include <vector>
@@ -49,8 +50,9 @@ public:
     bool parseLst(const std::string& fileName);
     bool saveLst(const std::string& fileName);
 
-    InstructionBlock& getInitBlock(const std::string& warpName);
-    InstructionBlock& getTestBlock(const std::string& warpName, const int& testId);
+    const std::set<std::string>& getVariables() const;
+    const InstructionBlock& getInitBlock(const std::string& warpName) const;
+    const InstructionBlock& getTestBlock(const std::string& warpName, const int& testId) const;
 
 private:
     class Impl;

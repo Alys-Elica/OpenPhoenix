@@ -607,13 +607,18 @@ bool Lst::saveLst(const std::string& fileName)
     return true;
 }
 
-Lst::InstructionBlock& Lst::getInitBlock(const std::string& warpName)
+const std::set<std::string>& Lst::getVariables() const
+{
+    return d_ptr->m_listVariables;
+}
+
+const Lst::InstructionBlock& Lst::getInitBlock(const std::string& warpName) const
 {
     return d_ptr->m_listWarps[warpName].initBlock;
 }
 
-Lst::InstructionBlock& Lst::getTestBlock(
-    const std::string& warpName, const int& testId)
+const Lst::InstructionBlock& Lst::getTestBlock(
+    const std::string& warpName, const int& testId) const
 {
     return d_ptr->m_listWarps[warpName].testBlockList[testId];
 }
