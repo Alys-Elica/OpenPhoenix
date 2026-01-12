@@ -400,6 +400,11 @@ void RendererOpenGL::deinit()
     SDL_DestroyWindow(d_ptr->m_window);
 }
 
+void RendererOpenGL::setTitle(const std::string& title)
+{
+    SDL_SetWindowTitle(d_ptr->m_window, title.c_str());
+}
+
 void RendererOpenGL::updateVr(unsigned short* vr)
 {
     glBindTexture(GL_TEXTURE_2D, d_ptr->m_textureVr);

@@ -51,6 +51,8 @@ public:
     bool init(int width, int height, bool isNewVr);
     void deinit();
 
+    void setTitle(const std::string& title);
+
     void updateVr(unsigned short* vr);
     void updateFrame(unsigned short* frame);
     void renderVr(float yaw, float pitch, float roll, float fov);
