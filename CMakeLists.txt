@@ -29,8 +29,6 @@ add_library(${PROJECT_NAME} SHARED
     ofnx/tools/datastream.cpp
 
     ofnx/ofnx_globals.h
-    ofnx/ofnxmanager.h
-    ofnx/ofnxmanager.cpp
 
     glad/gl.h
     glad/gl.c
@@ -44,11 +42,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 add_compile_definitions(
     OFNX_EXPORTS
 )
-
-# SDL3
-find_package(SDL3 CONFIG REQUIRED)
-find_package(SDL3_image CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL3_image::SDL3_image)
 
 # OpenGL
 find_package(OpenGL REQUIRED)

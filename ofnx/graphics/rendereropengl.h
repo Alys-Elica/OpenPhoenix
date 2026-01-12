@@ -39,28 +39,17 @@ namespace ofnx::graphics {
  */
 class OFNX_EXPORT RendererOpenGL final {
 public:
-    enum class CursorSystem {
-        Default,
-        Pointer,
-    };
-
-public:
     RendererOpenGL();
     ~RendererOpenGL();
 
-    bool init(int width, int height, bool isNewVr);
+    using oglLoadFunc = void (*)(void);
+    bool init(int width, int height, bool isNewVr, oglLoadFunc oglFct);
     void deinit();
-
-    void setTitle(const std::string& title);
 
     void updateVr(unsigned short* vr);
     void updateFrame(unsigned short* frame);
-    void renderVr(float yaw, float pitch, float roll, float fov);
+    void renderVr(int width, int height, float yaw, float pitch, float roll, float fov);
     void renderFrame();
-
-    void setCursorSettings(bool visible, bool centerLocked);
-    void setCursorSystem(const CursorSystem& cursor);
-    void setCursor(const std::string& cursorFile);
 
 private:
     class Impl;

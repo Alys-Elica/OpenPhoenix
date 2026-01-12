@@ -29,9 +29,6 @@ SOFTWARE.
 
 #include "glad/gl.h"
 
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_opengl.h>
-#include <SDL3_image/SDL_image.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -46,12 +43,6 @@ public:
     GLuint createShaderProgram(const char* vertexSrc, const char* fragmentSrc);
 
 private:
-    SDL_Window* m_window = nullptr;
-    SDL_GLContext m_glContext;
-
-    CursorSystem m_cursorCurrent;
-    SDL_Cursor* m_cursor = nullptr;
-
     GLuint m_textureVr = 0;
     GLuint m_textureFrame = 0;
     GLuint m_shaderVr = 0;
@@ -235,33 +226,10 @@ RendererOpenGL::~RendererOpenGL()
     delete d_ptr;
 }
 
-bool RendererOpenGL::init(int width, int height, bool isNewVr)
+bool RendererOpenGL::init(int width, int height, bool isNewVr, oglLoadFunc oglFct)
 {
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-
-    d_ptr->m_window = SDL_CreateWindow("FnxVR", width, height, SDL_WINDOW_OPENGL);
-    if (!d_ptr->m_window) {
-        std::cerr << "Failed to create SDL window: " << SDL_GetError() << std::endl;
-        return false;
-    }
-
-    d_ptr->m_glContext = SDL_GL_CreateContext(d_ptr->m_window);
-    if (!d_ptr->m_glContext) {
-        std::cerr << "Failed to create GL context: " << SDL_GetError() << std::endl;
-        SDL_DestroyWindow(d_ptr->m_window);
-        return false;
-    }
-
-    SDL_SetWindowRelativeMouseMode(d_ptr->m_window, true);
-
-    // Disable VSync
-    SDL_GL_SetSwapInterval(0);
-
-    if (!gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress)) {
-        std::cerr << "Failed to load GLAD: " << SDL_GetError() << std::endl;
-        SDL_DestroyWindow(d_ptr->m_window);
+    if (!gladLoadGL((GLADloadfunc)oglFct)) {
+        std::cerr << "Failed to load GLAD" << std::endl;
         return false;
     }
 
@@ -359,8 +327,6 @@ bool RendererOpenGL::init(int width, int height, bool isNewVr)
 
     d_ptr->m_shaderFrame = d_ptr->createShaderProgram(vertexShaderFrame, fragmentShader);
 
-    setCursorSystem(CursorSystem::Default);
-
     return true;
 }
 
@@ -383,11 +349,6 @@ void RendererOpenGL::deinit()
         d_ptr->m_textureFrame = 0;
     }
 
-    if (d_ptr->m_cursor) {
-        SDL_DestroyCursor(d_ptr->m_cursor);
-        d_ptr->m_cursor = nullptr;
-    }
-
     glDeleteVertexArrays(1, &d_ptr->m_vaoVr);
     glDeleteBuffers(1, &d_ptr->m_vboVr);
     glDeleteBuffers(1, &d_ptr->m_eboVr);
@@ -395,14 +356,6 @@ void RendererOpenGL::deinit()
     glDeleteVertexArrays(1, &d_ptr->m_vaoFrame);
     glDeleteBuffers(1, &d_ptr->m_vboFrame);
     glDeleteBuffers(1, &d_ptr->m_eboFrame);
-
-    SDL_GL_DestroyContext(d_ptr->m_glContext);
-    SDL_DestroyWindow(d_ptr->m_window);
-}
-
-void RendererOpenGL::setTitle(const std::string& title)
-{
-    SDL_SetWindowTitle(d_ptr->m_window, title.c_str());
 }
 
 void RendererOpenGL::updateVr(unsigned short* vr)
@@ -417,7 +370,7 @@ void RendererOpenGL::updateFrame(unsigned short* frame)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 640, 480, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, frame);
 }
 
-void RendererOpenGL::renderVr(float yaw, float pitch, float roll, float fov)
+void RendererOpenGL::renderVr(int width, int height, float yaw, float pitch, float roll, float fov)
 {
     // Update camera
     glm::mat4 view = glm::mat4(1.0f);
@@ -425,9 +378,6 @@ void RendererOpenGL::renderVr(float yaw, float pitch, float roll, float fov)
     view = glm::rotate(view, -glm::radians(pitch), glm::vec3(1, 0, 0));
     view = glm::rotate(view, glm::radians(yaw), glm::vec3(0, 0, 1));
 
-    int width;
-    int height;
-    SDL_GetWindowSize(d_ptr->m_window, &width, &height);
     glm::mat4 projection = glm::perspective(fov, (float)width / (float)height, 0.1f, 100.0f);
 
     // Render
@@ -445,8 +395,6 @@ void RendererOpenGL::renderVr(float yaw, float pitch, float roll, float fov)
 
     glBindVertexArray(d_ptr->m_vaoVr);
     glDrawElements(GL_TRIANGLES, 144, GL_UNSIGNED_INT, 0);
-
-    SDL_GL_SwapWindow(d_ptr->m_window);
 }
 
 void RendererOpenGL::renderFrame()
@@ -459,84 +407,6 @@ void RendererOpenGL::renderFrame()
     glBindTexture(GL_TEXTURE_2D, d_ptr->m_textureFrame);
     glUniform1i(glGetUniformLocation(d_ptr->m_shaderFrame, "tex"), 0);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-    SDL_GL_SwapWindow(d_ptr->m_window);
-}
-
-void RendererOpenGL::setCursorSettings(bool visible, bool centerLocked)
-{
-    if (centerLocked) {
-        int width;
-        int height;
-        SDL_GetWindowSize(d_ptr->m_window, &width, &height);
-        SDL_WarpMouseInWindow(d_ptr->m_window, width / 2, height / 2);
-    }
-
-    SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_CURSOR_VISIBLE, visible ? "1" : "0");
-    SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, centerLocked ? "1" : "0");
-    SDL_SetWindowRelativeMouseMode(d_ptr->m_window, centerLocked);
-}
-
-void RendererOpenGL::setCursorSystem(const CursorSystem& cursor)
-{
-    if (cursor == d_ptr->m_cursorCurrent) {
-        return;
-    }
-
-    if (d_ptr->m_cursor) {
-        SDL_DestroyCursor(d_ptr->m_cursor);
-    }
-
-    d_ptr->m_cursorCurrent = cursor;
-
-    switch (cursor) {
-    case CursorSystem::Pointer:
-        d_ptr->m_cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_POINTER);
-        break;
-
-    default:
-        d_ptr->m_cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
-        break;
-    }
-
-    SDL_SetCursor(d_ptr->m_cursor);
-}
-
-void RendererOpenGL::setCursor(const std::string& cursorFile)
-{
-    SDL_Surface* cursorSurface = IMG_Load(cursorFile.c_str());
-    if (!cursorSurface) {
-        std::cerr << "Failed to load image: " << SDL_GetError() << std::endl;
-        return;
-    }
-
-    const SDL_PixelFormatDetails* formatDetails = SDL_GetPixelFormatDetails(cursorSurface->format);
-    if (!formatDetails) {
-        std::cerr << "Failed to get format details " << SDL_GetError() << std::endl;
-        SDL_DestroySurface(cursorSurface);
-        return;
-    }
-
-    Uint32 key = SDL_MapRGBA(formatDetails, NULL, 0, 0, 0, 0);
-    SDL_SetSurfaceColorKey(cursorSurface, true, key);
-
-    int hotX = cursorSurface->w / 2;
-    int hotY = cursorSurface->h / 2;
-    SDL_Cursor* cursor = SDL_CreateColorCursor(cursorSurface, hotX, hotY);
-
-    SDL_DestroySurface(cursorSurface);
-
-    if (!cursor) {
-        std::cerr << "Failed to create SDL cursor: " << SDL_GetError() << std::endl;
-        return;
-    }
-
-    if (d_ptr->m_cursor) {
-        SDL_DestroyCursor(d_ptr->m_cursor);
-    }
-    d_ptr->m_cursor = cursor;
-
-    SDL_SetCursor(d_ptr->m_cursor);
 }
 
 } // namespace ofnx::graphics
