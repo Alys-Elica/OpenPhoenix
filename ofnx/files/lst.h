@@ -35,10 +35,9 @@ namespace ofnx::files {
 
 class OFNX_EXPORT Lst final {
 public:
-    using InstructionParam = std::variant<double, std::string>;
     struct Instruction {
         std::string name;
-        std::vector<InstructionParam> params;
+        std::vector<std::string> params;
         std::vector<Instruction> subInstructions; // For ifand/ifor/plugin/subroutine
     };
     using InstructionBlock = std::vector<Instruction>;

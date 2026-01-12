@@ -136,11 +136,6 @@ bool Lst::Impl::parseWarp(const std::string& line, std::string& warpName)
         warpName = line.substr(line.find('=') + 1, line.find(',') - line.find('=') - 1);
         trim(warpName);
 
-        // Remove '.vr' if it exists
-        if (warpName.find(".vr") != std::string::npos) {
-            warpName = warpName.substr(0, warpName.find(".vr"));
-        }
-
         return true;
     }
 
@@ -240,44 +235,39 @@ bool Lst::Impl::parseInstruction(const std::string& line, Lst::Instruction& inst
     std::string instructionName = line.substr(0, line.find_first_of(" ="));
     trim(instructionName);
 
-    std::string params = line.substr(line.find_first_of(" =") + 1);
-    trim(params);
+    std::string paramStr = line.substr(line.find_first_of(" =") + 1);
+    trim(paramStr);
 
-    enum class InstrParamType {
-        DOUBLE,
-        STRING
-    };
     struct InstrTmp {
         std::string name;
-        std::vector<InstrParamType> params;
         char separator = ',';
     };
     std::vector<InstrTmp> instrTmpList {
         //{"ifand", {InstrParamType::STRING}},
         //{"ifor", {InstrParamType::STRING}},
-        { "gotowarp", { InstrParamType::STRING } },
-        { "set", { InstrParamType::STRING, InstrParamType::DOUBLE }, '=' },
-        { "playmusique", { InstrParamType::STRING, InstrParamType::DOUBLE } },
-        { "stopmusique", { InstrParamType::STRING } },
-        { "playsound", { InstrParamType::STRING, InstrParamType::DOUBLE, InstrParamType::DOUBLE } },
-        { "stopsound", { InstrParamType::STRING } },
-        { "playsound3d", { InstrParamType::STRING, InstrParamType::DOUBLE, InstrParamType::DOUBLE, InstrParamType::DOUBLE } },
-        { "stopsound3d", { InstrParamType::STRING } },
-        { "setcursor", { InstrParamType::STRING, InstrParamType::STRING, InstrParamType::DOUBLE } },
-        { "setcursordefault", { InstrParamType::DOUBLE, InstrParamType::STRING } },
-        { "hidecursor", { InstrParamType::STRING, InstrParamType::DOUBLE } },
-        { "setangle", { InstrParamType::DOUBLE, InstrParamType::DOUBLE } },
-        { "interpolangle", { InstrParamType::DOUBLE, InstrParamType::DOUBLE, InstrParamType::DOUBLE } },
-        { "anglexmax", { InstrParamType::DOUBLE } },
-        { "angleymax", { InstrParamType::DOUBLE } },
-        { "return", {} },
-        { "end", {} },
-        { "fade", { InstrParamType::DOUBLE, InstrParamType::DOUBLE, InstrParamType::DOUBLE } },
-        { "lockkey", { InstrParamType::DOUBLE, InstrParamType::STRING } }, // Second argument is either a string or a number (0)
-        { "resetlockkey", {} },
-        { "setzoom", { InstrParamType::STRING } },
-        { "gosub", { InstrParamType::STRING } },
-        { "not", { InstrParamType::STRING } }
+        { "gotowarp" },
+        { "set", '=' },
+        { "playmusique" },
+        { "stopmusique" },
+        { "playsound" },
+        { "stopsound" },
+        { "playsound3d" },
+        { "stopsound3d" },
+        { "setcursor" },
+        { "setcursordefault" },
+        { "hidecursor" },
+        { "setangle" },
+        { "interpolangle" },
+        { "anglexmax" },
+        { "angleymax" },
+        { "return" },
+        { "end" },
+        { "fade" },
+        { "lockkey" }, // Second argument is either a string or a number (0)
+        { "resetlockkey" },
+        { "setzoom" },
+        { "gosub" },
+        { "not" }
     };
 
     if (instructionName == "ifand" || instructionName == "ifor") {
@@ -298,7 +288,7 @@ bool Lst::Impl::parseInstruction(const std::string& line, Lst::Instruction& inst
             return false;
         }
 
-        std::vector<std::string> paramsList = split(params, ',');
+        std::vector<std::string> paramsList = split(paramStr, ',');
         instruction.name = instructionName;
         for (const std::string& param : paramsList) {
             instruction.params.push_back(param);
@@ -310,30 +300,11 @@ bool Lst::Impl::parseInstruction(const std::string& line, Lst::Instruction& inst
         for (const InstrTmp& instrTmp : instrTmpList) {
             if (instructionName == instrTmp.name) {
                 instruction.name = instructionName;
+                instruction.params = split(paramStr, instrTmp.separator);
 
-                if (instrTmp.params.empty()) {
-                    return true;
-                }
-
-                std::vector<std::string> paramsList = split(params, instrTmp.separator);
-                if ((paramsList.size() != instrTmp.params.size())) {
-                    std::cerr << m_currentLine << " Error: invalid " << instructionName << " instruction: " << params << std::endl;
-                    return false;
-                }
-
-                for (size_t i = 0; i < paramsList.size(); ++i) {
-                    if (instrTmp.params[i] == InstrParamType::DOUBLE) {
-                        instruction.params.push_back((double)std::stoi(paramsList[i]));
-                    } else if (instrTmp.params[i] == InstrParamType::DOUBLE) {
-                        instruction.params.push_back(std::stod(paramsList[i]));
-                    } else if (instrTmp.params[i] == InstrParamType::STRING) {
-                        // Remove '.vr' if it exists
-                        if (paramsList[i].find(".vr") != std::string::npos) {
-                            paramsList[i] = paramsList[i].substr(0, paramsList[i].find(".vr"));
-                        }
-
-                        instruction.params.push_back(paramsList[i]);
-                    }
+                // Small fix for missing Set values (like in Louvre's CD2 script)
+                if (instruction.name == "set" && instruction.params.size() < 2) {
+                    instruction.params.push_back("0");
                 }
 
                 return true;
@@ -362,14 +333,6 @@ bool Lst::Impl::parsePluginInstruction(const std::string& line, Lst::Instruction
 
     std::vector<std::string> paramsList = split(params, ',');
     for (const std::string& param : paramsList) {
-        try {
-            instruction.params.push_back(std::stod(param));
-            continue;
-        } catch (const std::invalid_argument&) {
-            // Not a double: do nothing
-        }
-
-        // String
         std::string paramTmp = param;
         // Remove '"' if it exists
         if (param.front() == '"' && param.back() == '"') {
@@ -508,13 +471,6 @@ bool Lst::parseLst(const std::string& fileName)
     return true;
 }
 
-std::string doubleToString(double value)
-{
-    std::ostringstream oss;
-    oss << std::setprecision(8) << std::noshowpoint << value;
-    return oss.str();
-}
-
 std::string instructionToString(const Lst::Instruction& instruction, int level)
 {
     std::string str;
@@ -533,8 +489,8 @@ std::string instructionToString(const Lst::Instruction& instruction, int level)
                 }
             }
             str += instruction.name + "=";
-            for (const auto& param : instruction.params) {
-                str += std::get<std::string>(param);
+            for (const std::string& param : instruction.params) {
+                str += param;
                 if (&param != &instruction.params.back()) {
                     str += ",";
                 }
@@ -555,12 +511,7 @@ std::string instructionToString(const Lst::Instruction& instruction, int level)
             }
             str += subInstruction.name + "(";
             for (const auto& param : subInstruction.params) {
-                if (std::holds_alternative<double>(param)) {
-                    str += doubleToString(std::get<double>(param));
-                } else {
-                    str += std::get<std::string>(param);
-                }
-
+                str += param;
                 if (&param != &subInstruction.params.back()) {
                     str += ",";
                 }
@@ -573,13 +524,13 @@ std::string instructionToString(const Lst::Instruction& instruction, int level)
         }
         str += "endplugin";
     } else if (instruction.name == "setzoom") {
-        str += instruction.name + "=" + std::get<std::string>(instruction.params[0]);
+        str += instruction.name + "=" + instruction.params[0];
     } else if (instruction.name == "gotowarp") {
-        str += instruction.name + "=" + std::get<std::string>(instruction.params[0]) + ".vr";
+        str += instruction.name + "=" + instruction.params[0];
     } else if (instruction.name == "set") {
         str += instruction.name + " "
-            + std::get<std::string>(instruction.params[0]) + "="
-            + doubleToString(std::get<double>(instruction.params[1]));
+            + instruction.params[0] + "="
+            + instruction.params[1];
     } else {
         str += instruction.name;
         if (instruction.params.empty()) {
@@ -587,11 +538,7 @@ std::string instructionToString(const Lst::Instruction& instruction, int level)
         }
         str += " ";
         for (const auto& param : instruction.params) {
-            if (std::holds_alternative<double>(param)) {
-                str += doubleToString(std::get<double>(param));
-            } else {
-                str += std::get<std::string>(param);
-            }
+            str += param;
 
             if (&param != &instruction.params.back()) {
                 str += ",";
