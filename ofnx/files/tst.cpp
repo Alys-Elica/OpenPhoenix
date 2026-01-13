@@ -28,6 +28,7 @@ SOFTWARE.
 #include <vector>
 
 #include "ofnx/tools/datastream.h"
+#include "ofnx/tools/log.h"
 
 namespace ofnx::files {
 
@@ -65,7 +66,7 @@ bool Tst::loadFile(const std::string& fileName)
 
     std::fstream tstFile(fileName, std::ios::binary | std::ios::in);
     if (!tstFile.is_open()) {
-        std::cerr << "Failed to open TST file" << std::endl;
+        LOG_CRITICAL("Failed to open TST file");
         return false;
     }
 

@@ -27,6 +27,8 @@ SOFTWARE.
 #include <cstring>
 #include <iostream>
 
+#include "ofnx/tools/log.h"
+
 namespace ofnx::tools {
 
 /* PRIVATE */
@@ -58,7 +60,7 @@ void DataStream::Impl::read(const size_t size, uint8_t* data)
 {
     if (m_data) {
         if (m_pos + size > m_data->size()) {
-            std::cerr << "Out of range" << std::endl;
+            LOG_WARNING("Out of range");
             return;
         }
 
@@ -66,13 +68,13 @@ void DataStream::Impl::read(const size_t size, uint8_t* data)
         m_pos += size;
     } else if (m_file) {
         if (m_file->eof()) {
-            std::cerr << "Out of range" << std::endl;
+            LOG_WARNING("Out of range");
             return;
         }
 
         m_file->read(reinterpret_cast<char*>(data), size);
     } else {
-        std::cerr << "No input data source" << std::endl;
+        LOG_CRITICAL("No data source");
     }
 }
 
@@ -135,7 +137,7 @@ void DataStream::Impl::write(const size_t size, const uint8_t* data)
     } else if (m_file) {
         m_file->write(reinterpret_cast<const char*>(data), size);
     } else {
-        std::cerr << "No data source" << std::endl;
+        LOG_CRITICAL("No data source");
     }
 }
 

@@ -30,6 +30,7 @@ SOFTWARE.
 #include <vector>
 
 #include "ofnx/tools/datastream.h"
+#include "ofnx/tools/log.h"
 
 namespace ofnx::files {
 
@@ -38,8 +39,6 @@ class Fxm::Impl {
     friend class Fxm;
 
 public:
-    void logFileError(const std::string& message);
-
     uint32_t readChunkList();
     std::string readChunkString(const char* checkStr);
 
@@ -64,11 +63,6 @@ private:
     std::vector<TrackSound> m_soundTracks;
 };
 
-void Fxm::Impl::logFileError(const std::string& message)
-{
-    std::cerr << "[4XM](off: " << m_file.tellg() << ") - " << message << std::endl;
-}
-
 /**
  * Reads a chunk list from the file.
  * @return The size of the chunk list (0 if invalid).
@@ -78,7 +72,7 @@ uint32_t Fxm::Impl::readChunkList()
     char chunkList[5] = { 0 };
     m_file.read(chunkList, 4);
     if (strcmp(chunkList, "LIST") != 0) {
-        logFileError("Invalid LIST header");
+        LOG_CRITICAL("Invalid LIST header");
         return 0;
     }
 
@@ -125,7 +119,7 @@ bool Fxm::Impl::parseVideoTrack()
     char vtrk[5] = { 0 };
     m_file.read(vtrk, 4);
     if (strcmp(vtrk, "vtrk") != 0) {
-        logFileError("Invalid VTRK header");
+        LOG_CRITICAL("Invalid VTRK header");
         return false;
     }
 
@@ -168,7 +162,7 @@ bool Fxm::Impl::parseSoundTrack()
     char strk[5] = { 0 };
     m_file.read(strk, 4);
     if (strcmp(strk, "strk") != 0) {
-        logFileError("Invalid STRK header");
+        LOG_CRITICAL("Invalid STRK header");
         return false;
     }
 
@@ -211,7 +205,7 @@ bool Fxm::Impl::readRiff()
     char riff[5] = { 0 };
     m_file.read(riff, 4);
     if (strcmp(riff, "RIFF") != 0) {
-        logFileError("Invalid RIFF header");
+        LOG_CRITICAL("Invalid RIFF header");
         return false;
     }
 
@@ -223,7 +217,7 @@ bool Fxm::Impl::readRiff()
     char type[5] = { 0 };
     m_file.read(type, 4);
     if (strcmp(type, "4XMV") != 0) {
-        logFileError("Invalid 4XM header");
+        LOG_CRITICAL("Invalid 4XM header");
         return false;
     }
 
@@ -234,7 +228,7 @@ bool Fxm::Impl::readHead()
 {
     uint32_t chunkHeadListSize = readChunkList();
     if (chunkHeadListSize == 0) {
-        logFileError("Invalid HEAD chunk list");
+        LOG_CRITICAL("Invalid HEAD chunk list");
         return false;
     }
 
@@ -242,21 +236,21 @@ bool Fxm::Impl::readHead()
     char head[5] = { 0 };
     m_file.read(head, 4);
     if (strcmp(head, "HEAD") != 0) {
-        logFileError("Invalid HEAD header");
+        LOG_CRITICAL("Invalid HEAD header");
         return false;
     }
 
     // HNFO
     uint32_t chunkHnfoListSize = readChunkList();
     if (chunkHnfoListSize == 0) {
-        logFileError("Invalid HNFO chunk list");
+        LOG_CRITICAL("Invalid HNFO chunk list");
         return false;
     }
 
     char hnfo[5] = { 0 };
     m_file.read(hnfo, 4);
     if (strcmp(hnfo, "HNFO") != 0) {
-        logFileError("Invalid HNFO header");
+        LOG_CRITICAL("Invalid HNFO header");
         return false;
     }
 
@@ -270,7 +264,7 @@ bool Fxm::Impl::readHead()
     char hnfoStd_[5] = { 0 };
     m_file.read(hnfoStd_, 4);
     if (strcmp(hnfoStd_, "std_") != 0) {
-        logFileError("Invalid HNFO std_ header");
+        LOG_CRITICAL("Invalid HNFO std_ header");
         return false;
     }
 
@@ -291,7 +285,7 @@ bool Fxm::Impl::readHead()
         frameRate = 30;
         break;
     default:
-        logFileError("Invalid/unsupported frame rate");
+        LOG_CRITICAL("Invalid/unsupported frame rate");
         return false;
     }
 
@@ -307,7 +301,7 @@ bool Fxm::Impl::readTrk_()
 {
     uint32_t chunkTrk_ListSize = readChunkList();
     if (chunkTrk_ListSize == 0) {
-        logFileError("Invalid TRK_ chunk list");
+        LOG_CRITICAL("Invalid TRK_ chunk list");
         return false;
     }
 
@@ -317,14 +311,14 @@ bool Fxm::Impl::readTrk_()
     char trk_[5] = { 0 };
     m_file.read(trk_, 4);
     if (strcmp(trk_, "TRK_") != 0) {
-        logFileError("Invalid TRK_ header");
+        LOG_CRITICAL("Invalid TRK_ header");
         return false;
     }
 
     while (m_file.tellg() < offsetTrk + chunkTrk_ListSize) {
         uint32_t chunkSubTrkListSize = readChunkList();
         if (chunkSubTrkListSize == 0) {
-            logFileError("Invalid ?TRK chunk list");
+            LOG_CRITICAL("Invalid ?TRK chunk list");
             return false;
         }
 
@@ -341,7 +335,7 @@ bool Fxm::Impl::readTrk_()
                 return false;
             }
         } else {
-            logFileError("Invalid ?TRK header");
+            LOG_CRITICAL("Invalid ?TRK header");
             return false;
         }
     }
@@ -355,7 +349,7 @@ bool Fxm::Impl::readMovi()
 {
     uint32_t chunkMovi_ListSize = readChunkList();
     if (chunkMovi_ListSize == 0) {
-        logFileError("Invalid MOVI chunk list");
+        LOG_CRITICAL("Invalid MOVI chunk list");
         return false;
     }
 
@@ -365,7 +359,7 @@ bool Fxm::Impl::readMovi()
     char movi[5] = { 0 };
     m_file.read(movi, 4);
     if (strcmp(movi, "MOVI") != 0) {
-        logFileError("Invalid MOVI header");
+        LOG_CRITICAL("Invalid MOVI header");
         return false;
     }
 
@@ -374,7 +368,7 @@ bool Fxm::Impl::readMovi()
     while (m_file.tellg() < offsetMovi + chunkMovi_ListSize) {
         uint32_t chunkSubMoviListSize = readChunkList();
         if (chunkSubMoviListSize == 0) {
-            logFileError("Invalid ?MOVI chunk list");
+            LOG_CRITICAL("Invalid ?MOVI chunk list");
             return false;
         }
 
@@ -384,7 +378,7 @@ bool Fxm::Impl::readMovi()
         m_file.read(fram, 4);
 
         if (strcmp(fram, "FRAM") != 0) {
-            logFileError("Invalid FRAM header");
+            LOG_CRITICAL("Invalid FRAM header");
             return false;
         }
 
@@ -397,7 +391,7 @@ bool Fxm::Impl::readMovi()
             m_file >> chunkSize;
 
             if (chunkTypeStr != "ifrm" && chunkTypeStr != "pfrm" && chunkTypeStr != "cfrm" && chunkTypeStr != "snd_") {
-                logFileError("Invalid sub FRM chunk header");
+                LOG_CRITICAL("Invalid sub FRM chunk header");
                 return false;
             }
 
@@ -430,25 +424,21 @@ bool Fxm::open(const std::string& videoName)
         return false;
     }
 
-    std::cout << "Reading header..." << std::endl;
     if (!d_ptr->readRiff()) {
         d_ptr->m_file.close();
         return false;
     }
 
-    std::cout << "Reading HNFO..." << std::endl;
     if (!d_ptr->readHead()) {
         d_ptr->m_file.close();
         return false;
     }
 
-    std::cout << "Reading TRK_..." << std::endl;
     if (!d_ptr->readTrk_()) {
         d_ptr->m_file.close();
         return false;
     }
 
-    std::cout << "Reading MOVI..." << std::endl;
     if (!d_ptr->readMovi()) {
         d_ptr->m_file.close();
         return false;
@@ -469,26 +459,26 @@ bool Fxm::isOpen() const
 
 void Fxm::printInfo() const
 {
-    std::cout << "Video info:" << std::endl;
-    std::cout << "    Name: " << d_ptr->m_name << std::endl;
-    std::cout << "    Info: " << d_ptr->m_info << std::endl;
-    std::cout << "    Data rate: " << d_ptr->m_dataRate << std::endl;
-    std::cout << "    Frame rate: " << d_ptr->m_frameRate << " fps" << std::endl;
-    std::cout << "    Frame count: " << d_ptr->m_frameCount << std::endl;
-    std::cout << "    Video tracks:" << std::endl;
+    LOG_INFO("Video info");
+    LOG_INFO("    Name: {}", d_ptr->m_name);
+    LOG_INFO("    Info: {}", d_ptr->m_info);
+    LOG_INFO("    Data rate: {}", d_ptr->m_dataRate);
+    LOG_INFO("    Frame rate: {} fps", d_ptr->m_frameRate);
+    LOG_INFO("    Frame count: {}", d_ptr->m_frameCount);
+    LOG_INFO("    Video tracks:");
     for (const auto& track : d_ptr->m_videoTracks) {
-        std::cout << "        Name: " << track.name << std::endl;
-        std::cout << "        Width: " << track.width << std::endl;
-        std::cout << "        Height: " << track.height << std::endl;
+        LOG_INFO("        Name: {}", track.name);
+        LOG_INFO("        Width: {}", track.width);
+        LOG_INFO("        Height: {}", track.height);
     }
-    std::cout << "    Sound tracks:" << std::endl;
+    LOG_INFO("    Sound tracks:");
     for (const auto& track : d_ptr->m_soundTracks) {
-        std::cout << "        Name: " << track.name << std::endl;
-        std::cout << "        Track number: " << track.trackNumber << std::endl;
-        std::cout << "        Type: " << track.type << std::endl;
-        std::cout << "        Channels: " << track.channels << std::endl;
-        std::cout << "        Sample rate: " << track.sampleRate << std::endl;
-        std::cout << "        Sample resolution: " << track.sampleResolution << std::endl;
+        LOG_INFO("        Name: {}", track.name);
+        LOG_INFO("        Track number: {}", track.trackNumber);
+        LOG_INFO("        Type: {}", (int)track.type);
+        LOG_INFO("        Channels: {}", track.channels);
+        LOG_INFO("        Sample rate: {}", track.sampleRate);
+        LOG_INFO("        Sample resolution: {}", track.sampleResolution);
     }
 }
 
@@ -594,7 +584,7 @@ bool Fxm::readFrame(std::vector<uint16_t>& dataVideo, std::vector<uint8_t>& data
 {
     uint32_t chunkSubMoviListSize = d_ptr->readChunkList();
     if (chunkSubMoviListSize == 0) {
-        d_ptr->logFileError("Invalid ?MOVI chunk list");
+        LOG_CRITICAL("Invalid ?MOVI chunk list");
         return false;
     }
 
@@ -604,7 +594,7 @@ bool Fxm::readFrame(std::vector<uint16_t>& dataVideo, std::vector<uint8_t>& data
     d_ptr->m_file.read(fram, 4);
 
     if (strcmp(fram, "FRAM") != 0) {
-        d_ptr->logFileError("Invalid FRAM header");
+        LOG_CRITICAL("Invalid FRAM header");
         return false;
     }
 
@@ -643,7 +633,7 @@ bool Fxm::readFrame(std::vector<uint16_t>& dataVideo, std::vector<uint8_t>& data
 
             // TODO
             if (d_ptr->m_videoTracks.empty()) {
-                d_ptr->logFileError("No video track found");
+                LOG_CRITICAL("No video track found");
                 break;
             }
             dataVideo.assign(d_ptr->m_videoTracks[0].width * d_ptr->m_videoTracks[0].height, 0xFFFF);
@@ -653,7 +643,7 @@ bool Fxm::readFrame(std::vector<uint16_t>& dataVideo, std::vector<uint8_t>& data
             // TODO
         } else if (strcmp(chunkType, "snd_") == 0) {
             if (chunkData.size() < 8) {
-                d_ptr->logFileError("Empty sound data");
+                LOG_CRITICAL("Empty sound data");
                 break;
             }
 
@@ -667,7 +657,7 @@ bool Fxm::readFrame(std::vector<uint16_t>& dataVideo, std::vector<uint8_t>& data
             ds >> soundSize;
 
             if (d_ptr->m_soundTracks.empty()) {
-                d_ptr->logFileError("No sound track found");
+                LOG_CRITICAL("No sound track found");
                 break;
             }
 
@@ -726,11 +716,11 @@ bool Fxm::readFrame(std::vector<uint16_t>& dataVideo, std::vector<uint8_t>& data
                 break;
             }
             default:
-                d_ptr->logFileError("Invalid/unsupported audio type");
+                LOG_CRITICAL("Invalid/unsupported audio type");
                 break;
             }
         } else {
-            d_ptr->logFileError("Invalid ?FRM header");
+            LOG_CRITICAL("Invalid ?FRM header");
             return false;
         }
     }

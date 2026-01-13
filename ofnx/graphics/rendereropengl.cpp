@@ -27,11 +27,12 @@ SOFTWARE.
 #include <iostream>
 #include <vector>
 
-#include "glad/gl.h"
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include "glad/gl.h"
+#include "ofnx/tools/log.h"
 
 namespace ofnx::graphics {
 
@@ -229,7 +230,7 @@ RendererOpenGL::~RendererOpenGL()
 bool RendererOpenGL::init(int width, int height, bool isNewVr, oglLoadFunc oglFct)
 {
     if (!gladLoadGL((GLADloadfunc)oglFct)) {
-        std::cerr << "Failed to load GLAD" << std::endl;
+        LOG_CRITICAL("Failed to load GLAD");
         return false;
     }
 

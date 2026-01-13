@@ -31,6 +31,8 @@ SOFTWARE.
 #include <map>
 #include <set>
 
+#include "ofnx/tools/log.h"
+
 namespace ofnx::files {
 
 /* Helper functions */
@@ -152,7 +154,7 @@ bool Lst::Impl::parseTest(const std::string& line, int& test)
         test = std::stoi(testStr);
 
         if (test < -1) {
-            std::cerr << m_currentLine << " Error: invalid test number: " << test << std::endl;
+            LOG_CRITICAL("{} - Invalid test number: {}", m_currentLine, test);
             return false;
         }
 
@@ -182,7 +184,7 @@ bool Lst::Impl::parsePlugin(const std::string& line, Lst::Instruction& instructi
             }
 
             // Error
-            std::cerr << m_currentLine << " Error: unknown line in plugin: " << line << std::endl;
+            LOG_CRITICAL("{} - Unknown line in plugin: {}", m_currentLine, line);
             return false;
         }
 
@@ -220,7 +222,7 @@ bool Lst::Impl::parseSubroutine(const std::string& line, Lst::Instruction& instr
             }
 
             // Error
-            std::cerr << m_currentLine << " Error: unknown line in subroutine: " << line << std::endl;
+            LOG_CRITICAL("{} - Unknown line in subroutine: {}", m_currentLine, line);
             return false;
         }
 
@@ -273,7 +275,7 @@ bool Lst::Impl::parseInstruction(const std::string& line, Lst::Instruction& inst
     if (instructionName == "ifand" || instructionName == "ifor") {
         std::string line;
         if (!nextLine(line)) {
-            std::cerr << m_currentLine << " Error: unexpected end of file" << std::endl;
+            LOG_CRITICAL("{} - Unexpected end of file", m_currentLine);
             return false;
         }
 
@@ -284,7 +286,7 @@ bool Lst::Impl::parseInstruction(const std::string& line, Lst::Instruction& inst
             ;
         else {
             // Error
-            std::cerr << m_currentLine << " Error: unknown line in ifand/ifor: " << line << std::endl;
+            LOG_CRITICAL("{} - Unknown line in ifand/ifor: {}", m_currentLine, line);
             return false;
         }
 
@@ -311,7 +313,7 @@ bool Lst::Impl::parseInstruction(const std::string& line, Lst::Instruction& inst
             }
         }
 
-        std::cerr << m_currentLine << " Error: unknown instruction: " << instructionName << std::endl;
+        LOG_CRITICAL("{} - Unknown instruction: {}", m_currentLine, instructionName);
         return false;
     }
 
@@ -405,7 +407,7 @@ bool Lst::parseLst(const std::string& fileName)
 {
     d_ptr->m_file.open(fileName);
     if (!d_ptr->m_file) {
-        std::cerr << "Could not open file: " << fileName << std::endl;
+        LOG_CRITICAL("Could not open file: {}", fileName);
         return false;
     }
 
@@ -427,7 +429,7 @@ bool Lst::parseLst(const std::string& fileName)
 
         if (d_ptr->parseTest(line, currentTest)) {
             if (currentWarp.empty()) {
-                std::cerr << d_ptr->m_currentLine << " Error: [test] found before [warp]" << std::endl;
+                LOG_CRITICAL("{} - [test] fount before [warp]", d_ptr->m_currentLine);
                 return false;
             }
 
@@ -437,7 +439,7 @@ bool Lst::parseLst(const std::string& fileName)
         Lst::Instruction instructionPlugin;
         if (d_ptr->parsePlugin(line, instructionPlugin)) {
             if (currentWarp.empty()) {
-                std::cerr << d_ptr->m_currentLine << " Error: plugin found before [warp]" << std::endl;
+                LOG_CRITICAL("{} - Plugin found before [warp]", d_ptr->m_currentLine);
                 return false;
             }
 
@@ -454,7 +456,7 @@ bool Lst::parseLst(const std::string& fileName)
         Lst::Instruction instruction;
         if (d_ptr->parseInstruction(line, instruction)) {
             if (currentWarp.empty()) {
-                std::cerr << d_ptr->m_currentLine << " Error: instruction found before [warp]" << std::endl;
+                LOG_CRITICAL("{} - Instruction found before [warp]", d_ptr->m_currentLine);
                 return false;
             }
 
@@ -462,7 +464,7 @@ bool Lst::parseLst(const std::string& fileName)
             continue;
         }
 
-        std::cerr << d_ptr->m_currentLine << " Error: unknown line: " << line << std::endl;
+        LOG_CRITICAL("{} - Unknown line: {}", d_ptr->m_currentLine, line);
         d_ptr->m_file.close();
         return false;
     }
@@ -574,7 +576,7 @@ bool Lst::saveLst(const std::string& fileName)
 {
     std::ofstream file(fileName);
     if (!file) {
-        std::cerr << "Could not open file: " << fileName << std::endl;
+        LOG_CRITICAL("Could not open file: {}", fileName);
         return false;
     }
 

@@ -30,6 +30,7 @@ SOFTWARE.
 #include <vector>
 
 #include "ofnx/tools/datastream.h"
+#include "ofnx/tools/log.h"
 
 namespace ofnx::files {
 
@@ -111,7 +112,7 @@ bool Pak::open(const std::string& pakFileName)
 {
     d_ptr->filePak.open(pakFileName, std::ios_base::in | std::ios_base::binary);
     if (!d_ptr->filePak.is_open()) {
-        std::cerr << "Unable to open file " << pakFileName << std::endl;
+        LOG_CRITICAL("Could not open file: {}", pakFileName);
         return false;
     }
 
@@ -173,12 +174,12 @@ std::string Pak::fileName(int index) const
 std::vector<uint8_t> Pak::fileData(int index) const
 {
     if (index < 0 || index >= d_ptr->listFile.size()) {
-        std::cerr << "Index out of range" << std::endl;
+        LOG_CRITICAL("Index out of range");
         return std::vector<uint8_t>();
     }
 
     if (!isOpen()) {
-        std::cerr << "File not open" << std::endl;
+        LOG_CRITICAL("File not open");
         return std::vector<uint8_t>();
     }
 
@@ -192,14 +193,14 @@ std::vector<uint8_t> Pak::fileData(int index) const
         break;
 
     default:
-        std::cerr << "Compression not yet known" << std::endl;
+        LOG_CRITICAL("Compression not yet known");
         break;
     }
 
     if (uncompressedData.size() != subFile.uncompressedSize) {
-        std::cerr << "Uncompressed size does not match" << std::endl;
-        std::cerr << "    Expected: " << subFile.uncompressedSize << std::endl;
-        std::cerr << "    Actual: " << uncompressedData.size() << std::endl;
+        LOG_CRITICAL("Uncompressed size does not match");
+        LOG_CRITICAL("    Expected: {}", subFile.uncompressedSize);
+        LOG_CRITICAL("    Actual: {}", uncompressedData.size());
 
         return std::vector<uint8_t>();
     }
