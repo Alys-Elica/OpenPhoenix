@@ -2,7 +2,7 @@ OpenPhoenix source code:
 
     The MIT License (MIT)
 
-    Copyright (c) 2025 Alys_Elica
+    Copyright (c) 2026 Alys_Elica
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
