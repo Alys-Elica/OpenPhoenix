@@ -12,11 +12,7 @@
 #define FUNC_SIG __func__
 #endif
 
-#define LOG(level, fmt, ...)                                       \
-    do {                                                           \
-        std::cout << "[" << level << "][" << __func__ << "] "      \
-                  << std::format(fmt, ##__VA_ARGS__) << std::endl; \
-    } while (0)
+#define LOG(level, fmt, ...) std::cout << "[" << level << "][" << __func__ << "] " << std::format(fmt, ##__VA_ARGS__) << std::endl;
 #define LOG_DEBUG(fmt, ...) LOG("DEBUG", fmt, ##__VA_ARGS__)
 #define LOG_INFO(fmt, ...) LOG("INFO", fmt, ##__VA_ARGS__)
 #define LOG_WARNING(fmt, ...) LOG("WARNING", fmt, ##__VA_ARGS__)
