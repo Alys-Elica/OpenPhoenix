@@ -551,7 +551,7 @@ std::string instructionToString(const Lst::Instruction& instruction, int level)
 
 void printWarp(std::ofstream& file, const std::string& warpName, const Warp& warp)
 {
-    file << "[warp]=" << warpName << ".vr," << warpName << ".tst" << std::endl;
+    file << "[warp]=" << warpName << "," << warpName.substr(0, warpName.size() - 3) << ".tst" << std::endl;
 
     // Init block
     if (!warp.initBlock.empty()) {
