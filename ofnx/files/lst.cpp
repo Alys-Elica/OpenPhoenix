@@ -154,7 +154,7 @@ bool Lst::Impl::parseTest(const std::string& line, int& test)
         test = std::stoi(testStr);
 
         if (test < -1) {
-            LOG_CRITICAL("{} - Invalid test number: {}", m_currentLine, test);
+            LOG_ERROR("{} - Invalid test number: {}", m_currentLine, test);
             return false;
         }
 
@@ -184,7 +184,7 @@ bool Lst::Impl::parsePlugin(const std::string& line, Lst::Instruction& instructi
             }
 
             // Error
-            LOG_CRITICAL("{} - Unknown line in plugin: {}", m_currentLine, line);
+            LOG_ERROR("{} - Unknown line in plugin: {}", m_currentLine, line);
             return false;
         }
 
@@ -222,7 +222,7 @@ bool Lst::Impl::parseSubroutine(const std::string& line, Lst::Instruction& instr
             }
 
             // Error
-            LOG_CRITICAL("{} - Unknown line in subroutine: {}", m_currentLine, line);
+            LOG_ERROR("{} - Unknown line in subroutine: {}", m_currentLine, line);
             return false;
         }
 
@@ -275,7 +275,7 @@ bool Lst::Impl::parseInstruction(const std::string& line, Lst::Instruction& inst
     if (instructionName == "ifand" || instructionName == "ifor") {
         std::string line;
         if (!nextLine(line)) {
-            LOG_CRITICAL("{} - Unexpected end of file", m_currentLine);
+            LOG_ERROR("{} - Unexpected end of file", m_currentLine);
             return false;
         }
 
@@ -286,7 +286,7 @@ bool Lst::Impl::parseInstruction(const std::string& line, Lst::Instruction& inst
             ;
         else {
             // Error
-            LOG_CRITICAL("{} - Unknown line in ifand/ifor: {}", m_currentLine, line);
+            LOG_ERROR("{} - Unknown line in ifand/ifor: {}", m_currentLine, line);
             return false;
         }
 
@@ -313,7 +313,7 @@ bool Lst::Impl::parseInstruction(const std::string& line, Lst::Instruction& inst
             }
         }
 
-        LOG_CRITICAL("{} - Unknown instruction: {}", m_currentLine, instructionName);
+        LOG_ERROR("{} - Unknown instruction: {}", m_currentLine, instructionName);
         return false;
     }
 
@@ -407,7 +407,7 @@ bool Lst::parseLst(const std::string& fileName)
 {
     d_ptr->m_file.open(fileName);
     if (!d_ptr->m_file) {
-        LOG_CRITICAL("Could not open file: {}", fileName);
+        LOG_ERROR("Could not open file: {}", fileName);
         return false;
     }
 
@@ -429,7 +429,7 @@ bool Lst::parseLst(const std::string& fileName)
 
         if (d_ptr->parseTest(line, currentTest)) {
             if (currentWarp.empty()) {
-                LOG_CRITICAL("{} - [test] fount before [warp]", d_ptr->m_currentLine);
+                LOG_ERROR("{} - [test] fount before [warp]", d_ptr->m_currentLine);
                 return false;
             }
 
@@ -439,7 +439,7 @@ bool Lst::parseLst(const std::string& fileName)
         Lst::Instruction instructionPlugin;
         if (d_ptr->parsePlugin(line, instructionPlugin)) {
             if (currentWarp.empty()) {
-                LOG_CRITICAL("{} - Plugin found before [warp]", d_ptr->m_currentLine);
+                LOG_ERROR("{} - Plugin found before [warp]", d_ptr->m_currentLine);
                 return false;
             }
 
@@ -456,7 +456,7 @@ bool Lst::parseLst(const std::string& fileName)
         Lst::Instruction instruction;
         if (d_ptr->parseInstruction(line, instruction)) {
             if (currentWarp.empty()) {
-                LOG_CRITICAL("{} - Instruction found before [warp]", d_ptr->m_currentLine);
+                LOG_ERROR("{} - Instruction found before [warp]", d_ptr->m_currentLine);
                 return false;
             }
 
@@ -464,7 +464,7 @@ bool Lst::parseLst(const std::string& fileName)
             continue;
         }
 
-        LOG_CRITICAL("{} - Unknown line: {}", d_ptr->m_currentLine, line);
+        LOG_ERROR("{} - Unknown line: {}", d_ptr->m_currentLine, line);
         d_ptr->m_file.close();
         return false;
     }
@@ -576,7 +576,7 @@ bool Lst::saveLst(const std::string& fileName)
 {
     std::ofstream file(fileName);
     if (!file) {
-        LOG_CRITICAL("Could not open file: {}", fileName);
+        LOG_ERROR("Could not open file: {}", fileName);
         return false;
     }
 

@@ -66,7 +66,7 @@ bool Tst::loadFile(const std::string& fileName)
 
     std::fstream tstFile(fileName, std::ios::binary | std::ios::in);
     if (!tstFile.is_open()) {
-        LOG_CRITICAL("Failed to open TST file");
+        LOG_ERROR("Failed to open TST file");
         return false;
     }
 

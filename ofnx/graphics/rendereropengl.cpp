@@ -230,7 +230,7 @@ RendererOpenGL::~RendererOpenGL()
 bool RendererOpenGL::init(int width, int height, bool isNewVr, oglLoadFunc oglFct)
 {
     if (!gladLoadGL((GLADloadfunc)oglFct)) {
-        LOG_CRITICAL("Failed to load GLAD");
+        LOG_ERROR("Failed to load GLAD");
         return false;
     }
 

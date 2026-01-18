@@ -60,13 +60,13 @@ bool ArnVit::open(const std::string& vitFileName, const std::string& arnFileName
 {
     d_ptr->fileVit.open(vitFileName, std::ios::binary | std::ios::in);
     if (!d_ptr->fileVit.is_open()) {
-        LOG_CRITICAL("Unable to open VIT file ", vitFileName);
+        LOG_ERROR("Unable to open VIT file ", vitFileName);
         return false;
     }
 
     d_ptr->fileArn.open(arnFileName, std::ios::binary | std::ios::in);
     if (!d_ptr->fileArn.is_open()) {
-        LOG_CRITICAL("Unable to open ARN file ", arnFileName);
+        LOG_ERROR("Unable to open ARN file ", arnFileName);
         return false;
     }
 
@@ -151,14 +151,14 @@ bool ArnVit::writeToBmp(const int index, const std::string& outputDirectory) con
 {
     ArnVitFile file = getFile(index);
     if (file.data.empty()) {
-        LOG_CRITICAL("Unable to read file data");
+        LOG_ERROR("Unable to read file data");
         return false;
     }
 
     std::string bmpFile = outputDirectory + file.fileName;
     std::fstream fileBmp(bmpFile, std::ios::binary | std::ios::out);
     if (!fileBmp.is_open()) {
-        LOG_CRITICAL("Unable to open BMP file: {}", bmpFile);
+        LOG_ERROR("Unable to open BMP file: {}", bmpFile);
         return false;
     }
 

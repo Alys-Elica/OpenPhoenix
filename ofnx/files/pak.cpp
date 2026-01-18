@@ -112,7 +112,7 @@ bool Pak::open(const std::string& pakFileName)
 {
     d_ptr->filePak.open(pakFileName, std::ios_base::in | std::ios_base::binary);
     if (!d_ptr->filePak.is_open()) {
-        LOG_CRITICAL("Could not open file: {}", pakFileName);
+        LOG_ERROR("Could not open file: {}", pakFileName);
         return false;
     }
 
@@ -174,12 +174,12 @@ std::string Pak::fileName(int index) const
 std::vector<uint8_t> Pak::fileData(int index) const
 {
     if (index < 0 || index >= d_ptr->listFile.size()) {
-        LOG_CRITICAL("Index out of range");
+        LOG_ERROR("Index out of range");
         return std::vector<uint8_t>();
     }
 
     if (!isOpen()) {
-        LOG_CRITICAL("File not open");
+        LOG_ERROR("File not open");
         return std::vector<uint8_t>();
     }
 
@@ -193,14 +193,14 @@ std::vector<uint8_t> Pak::fileData(int index) const
         break;
 
     default:
-        LOG_CRITICAL("Compression not yet known");
+        LOG_ERROR("Compression not yet known");
         break;
     }
 
     if (uncompressedData.size() != subFile.uncompressedSize) {
-        LOG_CRITICAL("Uncompressed size does not match");
-        LOG_CRITICAL("    Expected: {}", subFile.uncompressedSize);
-        LOG_CRITICAL("    Actual: {}", uncompressedData.size());
+        LOG_ERROR("Uncompressed size does not match");
+        LOG_ERROR("    Expected: {}", subFile.uncompressedSize);
+        LOG_ERROR("    Actual: {}", uncompressedData.size());
 
         return std::vector<uint8_t>();
     }

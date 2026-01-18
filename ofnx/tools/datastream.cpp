@@ -60,7 +60,7 @@ void DataStream::Impl::read(const size_t size, uint8_t* data)
 {
     if (m_data) {
         if (m_pos + size > m_data->size()) {
-            LOG_WARNING("Out of range");
+            LOG_WARN("Out of range");
             return;
         }
 
@@ -68,13 +68,13 @@ void DataStream::Impl::read(const size_t size, uint8_t* data)
         m_pos += size;
     } else if (m_file) {
         if (m_file->eof()) {
-            LOG_WARNING("Out of range");
+            LOG_WARN("Out of range");
             return;
         }
 
         m_file->read(reinterpret_cast<char*>(data), size);
     } else {
-        LOG_CRITICAL("No data source");
+        LOG_ERROR("No data source");
     }
 }
 
@@ -137,7 +137,7 @@ void DataStream::Impl::write(const size_t size, const uint8_t* data)
     } else if (m_file) {
         m_file->write(reinterpret_cast<const char*>(data), size);
     } else {
-        LOG_CRITICAL("No data source");
+        LOG_ERROR("No data source");
     }
 }
 

@@ -88,7 +88,7 @@ bool Vr::load(const std::string& vrFileName)
 
     std::fstream fileIn(vrFileName, std::ios::binary | std::ios::in);
     if (!fileIn.is_open()) {
-        LOG_CRITICAL("Failed to open file");
+        LOG_ERROR("Failed to open file");
         return false;
     }
 
@@ -105,12 +105,12 @@ bool Vr::load(const std::string& vrFileName)
     ds >> chunkSize;
 
     if (chunkType != VR_FILE_HEADER && chunkType != VR2_FILE_HEADER) {
-        LOG_CRITICAL("Wrong file header");
+        LOG_ERROR("Wrong file header");
         return false;
     }
 
     if (chunkSize != fileSize) {
-        LOG_CRITICAL("Wrong file size");
+        LOG_ERROR("Wrong file size");
         return false;
     }
 
@@ -126,7 +126,7 @@ bool Vr::load(const std::string& vrFileName)
         if (chunkType == VR_TYPE_PIC || chunkType == VR_TYPE_VR
             || chunkType == VR2_TYPE_PIC || chunkType == VR2_TYPE_VR) {
             if (d_ptr->m_vrType != Type::VR_UNKNOWN) {
-                LOG_CRITICAL("Multiple image data in file");
+                LOG_ERROR("Multiple image data in file");
                 return false;
             }
 
@@ -169,7 +169,7 @@ bool Vr::load(const std::string& vrFileName)
                 ds >> subChunkSize;
 
                 if (subChunkType != VR_TYPE_ANIMATION_FRAME && subChunkType != VR2_TYPE_ANIMATION_FRAME) {
-                    LOG_CRITICAL("Unknown animation sub-chunk type");
+                    LOG_ERROR("Unknown animation sub-chunk type");
                     fileIn.seekg(subChunkSize - 8, std::ios::cur);
                 }
 
@@ -201,7 +201,7 @@ bool Vr::load(const std::string& vrFileName)
                 d_ptr->m_animationList[animName].frameList.push_back(animFrame);
             }
         } else {
-            LOG_CRITICAL("Unknown chunk type");
+            LOG_ERROR("Unknown chunk type");
             fileIn.seekg(chunkSize - 8, std::ios::cur);
         }
     }
