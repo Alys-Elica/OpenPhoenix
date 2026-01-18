@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "tst.h"
+#include "ofnx/files/tst.h"
 
 #include <fstream>
 #include <vector>

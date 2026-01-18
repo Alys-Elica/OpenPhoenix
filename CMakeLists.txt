@@ -7,32 +7,19 @@ project(${PROJECT_NAME} VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 23)
 
 add_library(${PROJECT_NAME} SHARED
-    ofnx/files/4xm.h
-    ofnx/files/4xm.cpp
-    ofnx/files/arnvit.h
-    ofnx/files/arnvit.cpp
-    ofnx/files/lst.h
-    ofnx/files/lst.cpp
-    ofnx/files/pak.h
-    ofnx/files/pak.cpp
-    ofnx/files/tst.h
-    ofnx/files/tst.cpp
-    ofnx/files/vr.h
-    ofnx/files/vr.cpp
+    src/ofnx/files/4xm.cpp
+    src/ofnx/files/arnvit.cpp
+    src/ofnx/files/lst.cpp
+    src/ofnx/files/pak.cpp
+    src/ofnx/files/tst.cpp
+    src/ofnx/files/vr.cpp
 
-    ofnx/graphics/dct.h
-    ofnx/graphics/dct.cpp
-    ofnx/graphics/rendereropengl.h
-    ofnx/graphics/rendereropengl.cpp
-    
-    ofnx/tools/datastream.h
-    ofnx/tools/datastream.cpp
+    src/ofnx/graphics/dct.cpp
+    src/ofnx/graphics/rendereropengl.cpp
 
-    ofnx/ofnx_globals.h
+    src/ofnx/tools/datastream.cpp
 
-    glad/gl.h
-    glad/gl.c
-    KHR/khrplatform.h
+    src/glad/gl.c
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -41,6 +28,13 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 add_compile_definitions(
     OFNX_EXPORTS
+)
+
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 # OpenGL

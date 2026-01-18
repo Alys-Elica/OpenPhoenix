@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "4xm.h"
+#include "ofnx/files/4xm.h"
 
 #include <algorithm>
 #include <cstring>
