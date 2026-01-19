@@ -157,6 +157,7 @@ bool Vr::load(const std::string& vrFileName)
             char strName[0x20];
             ds.read(0x20, (uint8_t*)strName);
             std::string animName(strName);
+            std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
 
             uint32_t frameCount;
             ds >> frameCount;
